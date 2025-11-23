@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+version = "2025.0.1"
+name = "tutor"
+description = "A fastapi project template with batteries included."
+
+dependencies = [
+    "google-adk",
+    "injector",
+    "pymongo",
+    "python-telegram-bot[job-queue]",
+    "python-dotenv",
+    "flake8",
+    "pytz",
+    "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
