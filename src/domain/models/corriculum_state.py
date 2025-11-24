@@ -53,3 +53,11 @@ class CurriculumState(BaseModel):
 
     def to_json_str(self) -> str:
         return self.model_dump_json(indent=2)
+
+    @staticmethod
+    def get_initial_curriculum_from_json() -> "CurriculumState":
+        curriculum_json_path = "./src/agents/telegram_agent/data/empty_curriculum.json"
+        with open(curriculum_json_path, "r", encoding="utf-8") as file:
+            json_str = file.read()
+        initial_state = CurriculumState.from_json(json_str)
+        return initial_state

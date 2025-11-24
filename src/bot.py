@@ -2,17 +2,18 @@ from logging import Logger
 
 import telegram
 from injector import inject
+from langfuse import get_client
+from openinference.instrumentation.google_adk import GoogleADKInstrumentor
 from telegram import Update, Message
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler
 
 from agents.runner import reply_to_mention
 from container import injector
-from infrastructure.curriculum_repository import CurriculumRepository
 from infrastructure.settings import Settings
 from infrastructure.util import clean_markdown
 
 applogger: Logger = injector.get(Logger)
-curriculum_repository: CurriculumRepository = injector.get(CurriculumRepository)
+
 
 async def send_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int, text: str, **kwargs) -> Message | None:
     """
@@ -54,7 +55,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def assistance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message.text:
         return
-    bot_message = await reply_to_mention(update.message.text, update, applogger, curriculum_repository)
+
+    bot_message = await reply_to_mention(update.message.text, update, applogger)
 
     await send_message(
         context,
@@ -66,10 +68,21 @@ async def assistance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 @inject
 def main(settings: Settings, logger: Logger) -> None:
+    logger.info("Initializing Langfuze client and tracing...")
+    langfuse = get_client()
+    # Verify connection
+    if langfuse.auth_check():
+        print("Langfuse client is authenticated and ready!")
+    else:
+        print("Authentication failed. Please check your credentials and host.")
+
+    logger.info("Initializing Langfuze GoogleADKInstrumentor...")
+    GoogleADKInstrumentor().instrument()
+
     print("Starting Telegram bot...")
     application = Application.builder().token(settings.get('telegram_bot_token')).build()
 
-    logger.info(settings.get('telegram_bot_token'))
+    # logger.info(settings.get('telegram_bot_token'))
 
     # Commands
     application.add_handler(CommandHandler("start", start))

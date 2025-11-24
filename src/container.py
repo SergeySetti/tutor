@@ -25,7 +25,7 @@ class AppModule(Module):
         binder.bind(Settings, to=Settings(
             config={
                 'telegram_bot_token': os.getenv("TELEGRAM_BOT_TOKEN"),
-                'app_name' : 'tutor_bot',
+                'app_name': 'agents',
                 'mongodb_database' : 'tutor_bot_db',
             }
         ), scope=singleton)

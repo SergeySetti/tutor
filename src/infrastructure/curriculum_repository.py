@@ -4,6 +4,7 @@ from typing import Dict
 import pytz
 from injector import inject
 from pymongo import MongoClient, ASCENDING
+from pymongo.results import UpdateResult
 
 from domain.models.corriculum_state import CurriculumState
 from infrastructure.db_config import MongoDBConfig
@@ -22,13 +23,15 @@ class CurriculumRepository:
         except Exception:
             print("Index for InteractionRepository already exists")
 
-    def insert_update_curriculum_state(self, user_name: str, state: CurriculumState) -> None:
+    def insert_update_curriculum_state(self, user_name: str, state: CurriculumState) -> bool:
         """Insert or update the curriculum state for a user."""
         self.collection.update_one(
             {"user_name": user_name},
             {"$set": {"state": state.model_dump_json(), "updated_at": datetime.datetime.now(pytz.utc)}},
             upsert=True
         )
+
+        return True
 
     def get_curriculum_state(self, user_name: str) -> Dict | None:
         """Retrieve the curriculum state for a user."""

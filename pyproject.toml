@@ -17,6 +17,8 @@ dependencies = [
     "flake8",
     "pytz",
     "pytest",
+    "langfuse",
+    "openinference-instrumentation-google-adk",
 ]
 
 [tool.setuptools.packages.find]

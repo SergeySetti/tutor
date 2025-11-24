@@ -1,25 +1,35 @@
+from google.adk.tools import ToolContext
+from pydantic import ValidationError
+
 from container import injector
+from domain.models.corriculum_state import CurriculumState
 from infrastructure.curriculum_repository import CurriculumRepository
 
 
-def save_curriculum_state(curriculum_stat_json: str) -> dict:
-    """A tool to save the curriculum state.
+def save_curriculum_state(tool_context: ToolContext, curriculum_state_json: str):
+    """A tool to save the curriculum state. Structure must be consistent, so that tool validat data before saving.
 
     Args:
-        curriculum_stat_json: A JSON string representing the curriculum state.
+    :param curriculum_state_json: A JSON string representing the curriculum state. Keep JSON structure but update values as needed.
+    :param tool_context:
+
     Returns: Result of the operation validation and saving.
     """
 
     try:
         curriculum_repository = injector.get(CurriculumRepository)
-        results = curriculum_repository.save_state(curriculum_stat_json)
+        print("SAVING CURRICULUM STATE:")
+        print(curriculum_state_json)
+        curriculum = CurriculumState.from_json(curriculum_state_json)
+        curriculum_repository.insert_update_curriculum_state(tool_context.state['user_name'], curriculum)
     except Exception as e:
         return {
             "status": "error",
             "message": e,
         }
 
-    return {"status": "success", "results": results}
+    return {"status": "success", "results": "Curriculum state has been saved."}
+
 
 def load_curriculum_state(user_id: str) -> dict:
     """A tool to load the curriculum state.
@@ -37,14 +47,19 @@ def load_curriculum_state(user_id: str) -> dict:
 
     return {"status": "success", "curriculum_state": curriculum_state_json}
 
-def reset_curriculum_state(user_id: str) -> dict:
-    """A tool to reset the curriculum state.
 
-    Returns: Result of the operation validation and resetting.
+def reset_curriculum_state(user_name: str) -> dict:
+    """A tool to reset the curriculum state. Use only when necessary. For example, when the curriculum is or not existing for the current user.
+
+    Returns: Result of the operation.
     """
 
     try:
-        # Replace with actual resetting logic
+        initial_curriculum_json_path = "./src/agents/telegram_agent/data/empty_curriculum.json"
+        with open(initial_curriculum_json_path, "r", encoding="utf-8") as file:
+            initial_curriculum_json = file.read()
+            curriculum_repository = injector.get(CurriculumRepository)
+            curriculum_repository.insert_update_curriculum_state(user_name, initial_curriculum_json)
         results = "Curriculum state has been reset."
     except Exception as e:
         return {
