@@ -40,6 +40,7 @@ async def init_session(app_name: str, user_id: str, session_id: str, user_name) 
         user_id=user_id,
         session_id=session_id,
         state={
+            "user_id": user_id,
             "user_name": user_name,
             "current_curriculum": initial_curriculum.model_dump_json()
         }  # Initial state

@@ -6,12 +6,11 @@ from domain.models.corriculum_state import CurriculumState
 from infrastructure.curriculum_repository import CurriculumRepository
 
 
-def save_curriculum_state(tool_context: ToolContext, curriculum_state_json: str):
+def save_curriculum_state(curriculum_state_json: str):
     """A tool to save the curriculum state. Structure must be consistent, so that tool validat data before saving.
 
     Args:
     :param curriculum_state_json: A JSON string representing the curriculum state. Keep JSON structure but update values as needed.
-    :param tool_context:
 
     Returns: Result of the operation validation and saving.
     """
@@ -20,12 +19,13 @@ def save_curriculum_state(tool_context: ToolContext, curriculum_state_json: str)
         curriculum_repository = injector.get(CurriculumRepository)
         print("SAVING CURRICULUM STATE:")
         print(curriculum_state_json)
+        CurriculumState.model_validate_json(curriculum_state_json)  # Validate before saving
         curriculum = CurriculumState.from_json(curriculum_state_json)
-        curriculum_repository.insert_update_curriculum_state(tool_context.state['user_name'], curriculum)
+        curriculum_repository.insert_update_curriculum_state('176622453', curriculum)
     except Exception as e:
         return {
             "status": "error",
-            "message": e,
+            "message": str(e),
         }
 
     return {"status": "success", "results": "Curriculum state has been saved."}
